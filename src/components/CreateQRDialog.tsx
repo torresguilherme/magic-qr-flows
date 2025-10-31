@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const qrCodeSchema = z.object({
   name: z.string().trim().min(1, "Nome é obrigatório").max(100),
@@ -22,6 +23,7 @@ interface CreateQRDialogProps {
 export const CreateQRDialog = ({ open, onOpenChange, onSuccess, userId }: CreateQRDialogProps) => {
   const [name, setName] = useState("");
   const [destinationUrl, setDestinationUrl] = useState("");
+  const [qrType, setQrType] = useState<"dynamic" | "static">("static");
   const [loading, setLoading] = useState(false);
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -47,6 +49,7 @@ export const CreateQRDialog = ({ open, onOpenChange, onSuccess, userId }: Create
           user_id: userId,
           name: validation.data.name,
           destination_url: validation.data.destination_url,
+          is_dynamic: qrType === "dynamic",
         });
 
       if (error) throw error;
@@ -86,6 +89,34 @@ export const CreateQRDialog = ({ open, onOpenChange, onSuccess, userId }: Create
             />
           </div>
 
+          <div className="space-y-3">
+            <Label>Tipo de QR Code</Label>
+            <RadioGroup value={qrType} onValueChange={(value: any) => setQrType(value)}>
+              <div className="flex items-start space-x-3 space-y-0">
+                <RadioGroupItem value="static" id="static" />
+                <div className="space-y-1 leading-none">
+                  <Label htmlFor="static" className="cursor-pointer font-medium">
+                    Estático (Recomendado)
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Vai direto para o link. Não pode ser alterado depois.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-3 space-y-0">
+                <RadioGroupItem value="dynamic" id="dynamic" />
+                <div className="space-y-1 leading-none">
+                  <Label htmlFor="dynamic" className="cursor-pointer font-medium">
+                    Dinâmico
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Você pode alterar o destino a qualquer momento sem reimprimir.
+                  </p>
+                </div>
+              </div>
+            </RadioGroup>
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="url">URL de destino</Label>
             <Input
@@ -97,9 +128,6 @@ export const CreateQRDialog = ({ open, onOpenChange, onSuccess, userId }: Create
               disabled={loading}
               required
             />
-            <p className="text-xs text-muted-foreground">
-              Você poderá alterar esta URL depois sem precisar reimprimir o QR Code
-            </p>
           </div>
 
           <div className="flex gap-3 justify-end">

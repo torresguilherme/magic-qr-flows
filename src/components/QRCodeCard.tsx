@@ -18,6 +18,7 @@ interface QRCodeCardProps {
     destination_url: string;
     scan_count: number;
     is_active: boolean;
+    is_dynamic: boolean;
     created_at: string;
   };
   onUpdate: () => void;
@@ -29,8 +30,10 @@ export const QRCodeCard = ({ qrCode, onUpdate, onDelete }: QRCodeCardProps) => {
   const [newUrl, setNewUrl] = useState(qrCode.destination_url);
   const [loading, setLoading] = useState(false);
 
-  // URL para o redirecionador - será a URL escaneada pelo QR code
-  const redirectUrl = `${window.location.origin}/r/${qrCode.id}`;
+  // Se for dinâmico, usa redirecionador. Se for estático, vai direto para o link
+  const qrCodeUrl = qrCode.is_dynamic 
+    ? `${window.location.origin}/r/${qrCode.id}`
+    : qrCode.destination_url;
 
   const handleUpdate = async () => {
     setLoading(true);
@@ -114,12 +117,17 @@ export const QRCodeCard = ({ qrCode, onUpdate, onDelete }: QRCodeCardProps) => {
           <div className="bg-white p-4 rounded-lg border-2 border-border">
             <QRCodeSVG
               id={`qr-${qrCode.id}`}
-              value={redirectUrl}
+              value={qrCodeUrl}
               size={180}
               level="H"
               includeMargin
             />
           </div>
+          {!qrCode.is_dynamic && (
+            <p className="text-xs text-center text-muted-foreground mt-2">
+              Estático
+            </p>
+          )}
         </div>
 
         {/* Info and Controls */}
@@ -179,15 +187,17 @@ export const QRCodeCard = ({ qrCode, onUpdate, onDelete }: QRCodeCardProps) => {
               </div>
 
               <div className="flex flex-wrap gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsEditing(true)}
-                  disabled={loading}
-                >
-                  <Edit2 className="w-4 h-4 mr-2" />
-                  Alterar destino
-                </Button>
+                {qrCode.is_dynamic && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsEditing(true)}
+                    disabled={loading}
+                  >
+                    <Edit2 className="w-4 h-4 mr-2" />
+                    Alterar destino
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   size="sm"
