@@ -16,6 +16,11 @@ export const SupportChat = () => {
 
   const sendToWebhook = async (userMessage: string) => {
     setIsLoading(true);
+    
+    // Add user message immediately
+    setMessages((prev) => [...prev, { text: userMessage, sender: "user" }]);
+    setMessage("");
+
     try {
       const response = await fetch("https://webhook.neurogrid.com.br/webhook/qrcode", {
         method: "POST",
@@ -32,13 +37,43 @@ export const SupportChat = () => {
 
       if (!response.ok) throw new Error("Erro ao enviar mensagem");
 
-      setMessages((prev) => [
-        ...prev,
-        { text: userMessage, sender: "user" },
-        { text: "Mensagem enviada! Nossa equipe responderá em breve.", sender: "system" },
-      ]);
-      setMessage("");
-      toast.success("Mensagem enviada com sucesso!");
+      // Read and process streaming response
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let fullResponse = "";
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value);
+          const lines = chunk.split("\n").filter((line) => line.trim());
+
+          for (const line of lines) {
+            try {
+              const data = JSON.parse(line);
+              if (data.type === "item" && data.content) {
+                fullResponse += data.content;
+              }
+            } catch (e) {
+              // Skip invalid JSON lines
+            }
+          }
+        }
+      }
+
+      // Add system response
+      if (fullResponse) {
+        setMessages((prev) => [...prev, { text: fullResponse, sender: "system" }]);
+        toast.success("Resposta recebida!");
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          { text: "Mensagem enviada! Nossa equipe responderá em breve.", sender: "system" },
+        ]);
+        toast.success("Mensagem enviada com sucesso!");
+      }
     } catch (error) {
       console.error("Erro ao enviar mensagem:", error);
       toast.error("Erro ao enviar mensagem. Tente novamente.");
