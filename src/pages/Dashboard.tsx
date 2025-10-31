@@ -6,13 +6,17 @@ import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { LogOut, Plus, QrCode, BarChart3, Sparkles } from "lucide-react";
 import { User, Session } from "@supabase/supabase-js";
+import { CreateQRDialog } from "@/components/CreateQRDialog";
+import { QRCodeCard } from "@/components/QRCodeCard";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<any>(null);
+  const [qrCodes, setQrCodes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -55,10 +59,26 @@ const Dashboard = () => {
 
       if (error) throw error;
       setProfile(data);
+      await fetchQRCodes(userId);
     } catch (error: any) {
       toast.error("Erro ao carregar perfil");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchQRCodes = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("qr_codes")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setQrCodes(data || []);
+    } catch (error: any) {
+      console.error("Erro ao carregar QR codes:", error);
     }
   };
 
@@ -123,7 +143,7 @@ const Dashboard = () => {
                 <QrCode className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <p className="text-2xl font-bold">0</p>
+                <p className="text-2xl font-bold">{qrCodes.length}</p>
                 <p className="text-sm text-muted-foreground">QR Codes ativos</p>
               </div>
             </div>
@@ -135,7 +155,9 @@ const Dashboard = () => {
                 <BarChart3 className="w-6 h-6 text-accent" />
               </div>
               <div>
-                <p className="text-2xl font-bold">0</p>
+                <p className="text-2xl font-bold">
+                  {qrCodes.reduce((sum, qr) => sum + qr.scan_count, 0)}
+                </p>
                 <p className="text-sm text-muted-foreground">Scans totais</p>
               </div>
             </div>
@@ -154,24 +176,56 @@ const Dashboard = () => {
           </Card>
         </div>
 
-        {/* Empty State */}
-        <Card className="p-12 text-center">
-          <div className="max-w-md mx-auto space-y-6">
-            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-              <QrCode className="w-10 h-10 text-primary" />
+        {/* QR Codes List or Empty State */}
+        {qrCodes.length > 0 ? (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold">Seus QR Codes</h2>
+              <Button onClick={() => setShowCreateDialog(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Novo QR Code
+              </Button>
             </div>
-            <div>
-              <h2 className="text-2xl font-bold mb-2">Crie seu primeiro QR Code</h2>
-              <p className="text-muted-foreground">
-                Comece gerando um QR Code dinâmico que você pode atualizar a qualquer momento
-              </p>
+            <div className="space-y-4">
+              {qrCodes.map((qrCode) => (
+                <QRCodeCard
+                  key={qrCode.id}
+                  qrCode={qrCode}
+                  onUpdate={() => user && fetchQRCodes(user.id)}
+                  onDelete={() => user && fetchQRCodes(user.id)}
+                />
+              ))}
             </div>
-            <Button variant="hero" size="xl">
-              <Plus className="w-5 h-5 mr-2" />
-              Criar QR Code
-            </Button>
           </div>
-        </Card>
+        ) : (
+          <Card className="p-12 text-center">
+            <div className="max-w-md mx-auto space-y-6">
+              <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+                <QrCode className="w-10 h-10 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold mb-2">Crie seu primeiro QR Code</h2>
+                <p className="text-muted-foreground">
+                  Comece gerando um QR Code dinâmico que você pode atualizar a qualquer momento
+                </p>
+              </div>
+              <Button variant="hero" size="xl" onClick={() => setShowCreateDialog(true)}>
+                <Plus className="w-5 h-5 mr-2" />
+                Criar QR Code
+              </Button>
+            </div>
+          </Card>
+        )}
+
+        {/* Create Dialog */}
+        {user && (
+          <CreateQRDialog
+            open={showCreateDialog}
+            onOpenChange={setShowCreateDialog}
+            onSuccess={() => fetchQRCodes(user.id)}
+            userId={user.id}
+          />
+        )}
       </div>
     </div>
   );
