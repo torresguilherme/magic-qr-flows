@@ -1,9 +1,12 @@
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { QrCode, BarChart3, RefreshCw, Sparkles } from "lucide-react";
 import heroImage from "@/assets/hero-qr.jpg";
 
 const Index = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -40,7 +43,12 @@ const Index = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
-              <Button variant="hero" size="xl" className="group">
+              <Button 
+                variant="hero" 
+                size="xl" 
+                className="group"
+                onClick={() => navigate("/auth")}
+              >
                 <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform" />
                 Gerar meu QR Code Mágico!
               </Button>
@@ -156,7 +164,11 @@ const Index = () => {
           </div>
 
           <div className="text-center mt-16">
-            <Button variant="hero" size="xl">
+            <Button 
+              variant="hero" 
+              size="xl"
+              onClick={() => navigate("/auth")}
+            >
               <Sparkles className="w-5 h-5" />
               Começar agora gratuitamente
             </Button>
