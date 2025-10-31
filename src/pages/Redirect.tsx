@@ -17,7 +17,7 @@ const Redirect = () => {
         // Fetch QR code data
         const { data: qrCode, error: fetchError } = await supabase
           .from("qr_codes")
-          .select("destination_url, is_active")
+          .select("destination_url, is_active, scan_count")
           .eq("id", id)
           .single();
 
@@ -26,17 +26,17 @@ const Redirect = () => {
           return;
         }
 
-        // Log the scan (fire and forget)
-        supabase
-          .from("qr_scans")
-          .insert({
+        // Log the scan and update count (fire and forget)
+        Promise.all([
+          supabase.from("qr_scans").insert({
             qr_code_id: id,
             user_agent: navigator.userAgent,
-          })
-          .then(() => {
-            // Update scan count
-            supabase.rpc("increment_scan_count", { qr_id: id });
-          });
+          }),
+          supabase
+            .from("qr_codes")
+            .update({ scan_count: qrCode.scan_count + 1 })
+            .eq("id", id),
+        ]);
 
         // Redirect to destination
         window.location.href = qrCode.destination_url;

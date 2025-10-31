@@ -119,7 +119,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      increment_scan_count: { Args: { qr_id: string }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
