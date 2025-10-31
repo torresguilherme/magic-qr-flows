@@ -47,6 +47,7 @@ export type Database = {
           destination_url: string
           id: string
           is_active: boolean
+          is_dynamic: boolean
           name: string
           scan_count: number
           updated_at: string
@@ -57,6 +58,7 @@ export type Database = {
           destination_url: string
           id?: string
           is_active?: boolean
+          is_dynamic?: boolean
           name: string
           scan_count?: number
           updated_at?: string
@@ -67,6 +69,7 @@ export type Database = {
           destination_url?: string
           id?: string
           is_active?: boolean
+          is_dynamic?: boolean
           name?: string
           scan_count?: number
           updated_at?: string
