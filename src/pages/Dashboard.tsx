@@ -8,6 +8,7 @@ import { LogOut, Plus, QrCode, BarChart3, Sparkles } from "lucide-react";
 import { User, Session } from "@supabase/supabase-js";
 import { CreateQRDialog } from "@/components/CreateQRDialog";
 import { QRCodeCard } from "@/components/QRCodeCard";
+import { SupportChat } from "@/components/SupportChat";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -227,6 +228,9 @@ const Dashboard = () => {
           />
         )}
       </div>
+
+      {/* Support Chat */}
+      <SupportChat />
     </div>
   );
 };

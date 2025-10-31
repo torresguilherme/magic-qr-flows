@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { QrCode, BarChart3, RefreshCw, Sparkles } from "lucide-react";
 import heroImage from "@/assets/hero-qr.jpg";
+import { SupportChat } from "@/components/SupportChat";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -186,6 +187,9 @@ const Index = () => {
           </div>
         </div>
       </footer>
+
+      {/* Support Chat */}
+      <SupportChat />
     </div>
   );
 };
