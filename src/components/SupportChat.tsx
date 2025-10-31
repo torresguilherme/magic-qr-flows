@@ -11,13 +11,13 @@ export const SupportChat = () => {
   const [userName, setUserName] = useState("");
   const [hasProvidedName, setHasProvidedName] = useState(false);
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState<Array<{ text: string; sender: 'user' | 'system' }>>([]);
+  const [messages, setMessages] = useState<Array<{ text: string; sender: "user" | "system" }>>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const sendToWebhook = async (userMessage: string) => {
     setIsLoading(true);
     try {
-      const response = await fetch("https://n8n.neurogrid.com.br/webhook-test/qrcode", {
+      const response = await fetch("https://webhook.neurogrid.com.br/webhook/qrcode", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -26,16 +26,16 @@ export const SupportChat = () => {
           userName: userName,
           message: userMessage,
           timestamp: new Date().toISOString(),
-          source: "qr-code-app"
+          source: "qr-code-app",
         }),
       });
 
       if (!response.ok) throw new Error("Erro ao enviar mensagem");
 
-      setMessages(prev => [
+      setMessages((prev) => [
         ...prev,
-        { text: userMessage, sender: 'user' },
-        { text: "Mensagem enviada! Nossa equipe responderá em breve.", sender: 'system' }
+        { text: userMessage, sender: "user" },
+        { text: "Mensagem enviada! Nossa equipe responderá em breve.", sender: "system" },
       ]);
       setMessage("");
       toast.success("Mensagem enviada com sucesso!");
@@ -54,7 +54,7 @@ export const SupportChat = () => {
       return;
     }
     setHasProvidedName(true);
-    setMessages([{ text: `Olá ${userName}! Como podemos ajudar?`, sender: 'system' }]);
+    setMessages([{ text: `Olá ${userName}! Como podemos ajudar?`, sender: "system" }]);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -102,9 +102,7 @@ export const SupportChat = () => {
                 <div className="text-center text-muted-foreground mb-6">
                   <MessageCircle className="h-12 w-12 mx-auto mb-2 opacity-50" />
                   <p className="font-medium">Bem-vindo ao Suporte!</p>
-                  <p className="text-sm mt-2">
-                    Por favor, informe seu nome para começarmos.
-                  </p>
+                  <p className="text-sm mt-2">Por favor, informe seu nome para começarmos.</p>
                 </div>
                 <form onSubmit={handleNameSubmit} className="space-y-3">
                   <div className="space-y-2">
@@ -125,15 +123,10 @@ export const SupportChat = () => {
             ) : (
               <div className="space-y-4">
                 {messages.map((msg, index) => (
-                  <div
-                    key={index}
-                    className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                  >
+                  <div key={index} className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
                     <div
                       className={`max-w-[80%] rounded-lg p-3 ${
-                        msg.sender === 'user'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted'
+                        msg.sender === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
                       }`}
                     >
                       <p className="text-sm">{msg.text}</p>
@@ -155,11 +148,7 @@ export const SupportChat = () => {
                   disabled={isLoading}
                   className="flex-1"
                 />
-                <Button 
-                  type="submit" 
-                  size="icon"
-                  disabled={isLoading || !message.trim()}
-                >
+                <Button type="submit" size="icon" disabled={isLoading || !message.trim()}>
                   <Send className="h-4 w-4" />
                 </Button>
               </div>
