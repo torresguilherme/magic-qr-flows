@@ -95,10 +95,17 @@ export const QRCodeCard = ({ qrCode, onUpdate, onDelete }: QRCodeCardProps) => {
     const img = new Image();
 
     img.onload = () => {
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx?.drawImage(img, 0, 0);
-      const pngFile = canvas.toDataURL("image/png");
+      // Gerar imagem em altíssima resolução (2048x2048)
+      const highResSize = 2048;
+      canvas.width = highResSize;
+      canvas.height = highResSize;
+      
+      // Desenhar com qualidade máxima
+      ctx!.imageSmoothingEnabled = true;
+      ctx!.imageSmoothingQuality = 'high';
+      ctx?.drawImage(img, 0, 0, highResSize, highResSize);
+      
+      const pngFile = canvas.toDataURL("image/png", 1.0);
 
       const downloadLink = document.createElement("a");
       downloadLink.download = `${qrCode.name.replace(/\s+/g, "-")}-qrcode.png`;
@@ -106,7 +113,7 @@ export const QRCodeCard = ({ qrCode, onUpdate, onDelete }: QRCodeCardProps) => {
       downloadLink.click();
     };
 
-    img.src = "data:image/svg+xml;base64," + btoa(svgData);
+    img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
   };
 
   return (
@@ -118,7 +125,7 @@ export const QRCodeCard = ({ qrCode, onUpdate, onDelete }: QRCodeCardProps) => {
             <QRCodeSVG
               id={`qr-${qrCode.id}`}
               value={qrCodeUrl}
-              size={180}
+              size={256}
               level="H"
               includeMargin
             />
